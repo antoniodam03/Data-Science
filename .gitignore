@@ -1,0 +1,81 @@
+# ===================== Sistema operativo / editor =====================
+.DS_Store
+._*
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# ===================== LaTeX =====================
+# File ausiliari di compilazione
+*.aux
+*.lof
+*.lot
+*.toc
+*.out
+*.log
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.brf
+*.nav
+*.snm
+*.vrb
+
+# Bibliografia (bibtex/biber)
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+
+# Indici e glossari (makeindex/glossaries)
+*.idx
+*.ilg
+*.ind
+*.ist
+*.glo
+*.gls
+*.glg
+*.glsdefs
+*.acn
+*.acr
+*.alg
+
+# PDF compilato della tesina
+Tesina*/main.pdf
+
+# ===================== Python =====================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Ambienti virtuali
+.venv/
+venv/
+env/
+.conda/
+
+# Variabili d'ambiente / segreti
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Test e strumenti
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Dati e modelli pesanti (decommenta se necessario)
+# data/raw/
+# *.csv
+# *.pkl
+# *.h5
