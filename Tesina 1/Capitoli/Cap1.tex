@@ -1,18 +1,161 @@
-\chapter{Descrizione del dataset} %\label{1cap:spinta_laterale}
+\chapter{Descrizione del dataset} \label{cap:dataset}
 
 \begin{preamble}
-{\em Preambolo}
+{\em In questo capitolo viene introdotto il dataset di riferimento della piattaforma ENTSO-E, illustrandone la struttura, il perimetro informativo e il relativo Dizionario dei Dati. Vengono inoltre formalizzate le operazioni di pulizia ed ETL necessarie per preparare i dati alle fasi successive di analisi ed esplorazione.}
 \end{preamble}
 
+\section{Il Dataset ENTSO-E (2024--2025)}
+Il dataset selezionato per questo progetto rappresenta la risorsa più completa e autorevole a livello continentale per l’analisi quantitativa e la modellazione del mercato elettrico all'ingrosso. Esso si compone originariamente di 301.391 record (pari a 288.288 a valle del filtraggio delle zone a elevata frammentarietà), ciascuno rappresentante lo stato orario di una specifica zona di mercato europea (\textit{bidding zone}), e copre un arco temporale continuo che va dal 1° gennaio 2024 al 30 giugno 2025.
 
-%\begin{figure}[ht!]
-%	\centering
-%	\includegraphics [width=.95\columnwidth, angle=0]{iter_autorizzativo} % height
-%	\caption{Possibile schema di un iter autorizzativo per i sistemi a circuito aperto e chiuso}
-%	\label{8fig:iter_autorizzativo}
-%\end{figure}
+La struttura del dataset è stata progettata per offrire una visione olistica del funzionamento del sistema elettrico e delle dinamiche di prezzo: non si limita a registrare la quotazione oraria del mercato del giorno prima (\textit{Day-Ahead Market}), ma ne traccia la dimensione temporale e geografica, la complessa articolazione del mix produttivo per singola tecnologia primaria (fonti rinnovabili non programmabili, impianti a ciclo combinato e termoelettrici, generazione nucleare e idroelettrica) e i contributi dei sistemi di accumulo. Questa granularità consente di comprendere i meccanismi marginali di formazione del prezzo e di quantificare l'impatto della variabilità climatica e della transizione verde sulle reti di trasmissione continentali.
+
+Di seguito viene riportato il Dizionario dei Dati (Tabella~\ref{tab:dizionario_dati}), che descrive nel dettaglio il significato di ciascuna variabile selezionata per l'analisi.
+
+\renewcommand{\arraystretch}{1.2}
+\begin{xltabular}{\textwidth}{|l|X|}
+\caption{Elenco completo delle 25 variabili selezionate dal dataset ENTSO-E.} \label{tab:dizionario_dati} \\
+\hline
+\rowcolor[gray]{0.9}
+\textbf{Nome Colonna} & \textbf{Descrizione} \\ \hline
+\endfirsthead
+
+\hline
+\rowcolor[gray]{0.9}
+\textbf{Nome Colonna} & \textbf{Descrizione} \\ \hline
+\endhead
+
+\hline
+\multicolumn{2}{|r|}{\footnotesize Continua nella prossima pagina...} \\ \hline
+\endfoot
+
+\hline
+\endlastfoot
+
+\texttt{datetime} & Data e ora della rilevazione oraria con indicazione del fuso orario locale. \\ \hline
+\texttt{country} & Codice identificativo della zona di mercato (\textit{bidding zone}, es. \texttt{IT\_NORD}, \texttt{DE\_LU}, \texttt{FR}). \\ \hline
+\texttt{price} & Prezzo all'ingrosso dell'energia elettrica fissato sul \textit{Day-Ahead Market} (in \euro/MWh). \\ \hline
+\texttt{solar} & Produzione oraria da fonte solare fotovoltaica (in MW). \\ \hline
+\texttt{wind\_onshore} & Produzione oraria da aerogeneratori eolici terrestri (in MW). \\ \hline
+\texttt{wind\_offshore} & Produzione oraria da parchi eolici marini (\textit{offshore}, in MW). \\ \hline
+\texttt{fossil\_gas} & Generazione termoelettrica da gas naturale (turbogas e cicli combinati CCGT, in MW). \\ \hline
+\texttt{nuclear} & Produzione elettrica da reattori elettronucleari a fissione (in MW). \\ \hline
+\texttt{hydro\_total} & Generazione idroelettrica aggregata complessiva (in MW). \\ \hline
+\texttt{hydro\_run\_of\_river\_and\_poundage} & Generazione idroelettrica da impianti ad acqua fluente (in MW). \\ \hline
+\texttt{hydro\_water\_reservoir} & Generazione idroelettrica modulabile da bacini idrici artificiali con accumulo (in MW). \\ \hline
+\texttt{hydro\_pumped\_storage} & Generazione netta e turbinaggio da impianti di pompaggio idroelettrico (in MW). \\ \hline
+\texttt{energy\_storage} & Immissione netta da sistemi stazionari di accumulo elettrochimico (batterie, in MW). \\ \hline
+\texttt{biomass} & Generazione elettrica da biomasse solide, liquide e biogas (in MW). \\ \hline
+\texttt{waste} & Termovalorizzazione energetica da frazioni di rifiuti solidi (in MW). \\ \hline
+\texttt{geothermal} & Generazione termoelettrica da sorgenti geotermiche ad alta entalpia (in MW). \\ \hline
+\texttt{fossil\_hard\_coal} & Generazione termoelettrica da carbone rigido (litantrace e antracite, in MW). \\ \hline
+\texttt{fossil\_brown\_coal\_lignite} & Generazione termoelettrica da lignite (carbone bruno, in MW). \\ \hline
+\texttt{fossil\_oil} & Generazione da prodotti petroliferi e olio combustibile (in MW). \\ \hline
+\texttt{fossil\_coal\_derived\_gas} & Generazione termoelettrica da gas derivati da processi di distillazione del carbone (in MW). \\ \hline
+\texttt{fossil\_oil\_shale} & Produzione termoelettrica da scisti bituminosi (in MW). \\ \hline
+\texttt{fossil\_peat} & Generazione termoelettrica da combustione di torba (in MW). \\ \hline
+\texttt{marine} & Generazione sperimentale da energia marina (moto ondoso e maree, in MW). \\ \hline
+\texttt{other} & Altra generazione termica convenzionale non altrimenti specificata (in MW). \\ \hline
+\texttt{other\_renewable} & Altre fonti di generazione rinnovabile minori non categorizzate (in MW). \\ \hline
+\end{xltabular}
+\renewcommand{\arraystretch}{1.0}
+
+\section{Qualità dei Dati e Preparazione (ETL)}
+Data la complessità e la vastità del dataset \textit{ENTSO-E}, prima di procedere con l'addestramento dei modelli di Machine Learning e la stima delle serie temporali, è stata necessaria una fase strutturata di \textit{Data Cleaning e preparazione dei dati (ETL -- Extract, Transform, Load)}. L'obiettivo principale è quello di rendere i dati accessibili, \textbf{puliti e strutturati}, così da supportare in modo efficace le analisi.
+
+In particolare, sono stati eseguiti i seguenti passaggi:
+
+\begin{enumerate}
+    \item \textit{Selezione delle colonne rilevanti}:\\
+    Dal dataset originale sono state estratte solo le colonne necessarie per l'analisi, suddivise per categorie: identificativi temporali e geografici, quotazione di mercato del prezzo e singole fonti di produzione energetica primaria. Sono state rimosse 14 colonne aggregate ridondanti (aventi prefisso e suffisso \texttt{\_actual\_aggregated\_}) presenti unicamente per la Polonia e prive di dati per le restanti zone, migliorando la leggibilità e le performance di calcolo.
+    
+    \item \textit{Gestione dei vuoti strutturali e delle date}:\\
+    Nelle zone in cui una tecnologia non è fisicamente presente nell'infrastruttura energetica (ad esempio, il nucleare in Italia o l'eolico marino in Austria), i valori mancanti (\texttt{NaN}) sono stati convertiti a zero (\texttt{0.0}). Si è inoltre proceduto a convertire le date registrate in UTC (tipo : \texttt{timestamp}) nell'ora locale di ciascuna zona per preservare la corrispondenza fisica del ciclo solare.
+    \item \textit{Normalizzazione dei valori numerici e gestione dei prezzi mancanti}:\\
+    Il dataset presentava esattamente 22 valori di prezzo mancanti su oltre 301.000 righe, circoscritti a una singola ora per zona in concomitanza con la transizione dell'ora legale. Tali valori isolati sono stati imputati mediante interpolazione lineare locale. I prezzi estremi (compresi tra $-462{,}33$~\euro/MWh e $+1.896{,}00$~\euro/MWh) sono stati verificati e mantenuti in quanto rappresentano shock reali di mercato legati a congestioni o sovraproduzione da rinnovabili.
+    
+    \item \textit{Verifica della qualità dei dati e filtraggio zonale}:\\
+    Il dataset è stato controllato per valori nulli e duplicati, confermando l'assenza di buchi temporali. A seguito della verifica, la zona irlandese (\texttt{IE\_SEM}) è stata esclusa dall'analisi a causa dell'eccessiva frammentarietà e incompletezza dei sensori di generazione (13.103 righe con estese lacune), garantendo un panel uniforme e bilanciato composto da 22 zone di mercato.
+    
+    \item \textit{Preparazione per l'analisi di Machine Learning}:\\
+    Al termine del preprocessing, il dataset risultante è stato strutturato in tre viste analitiche esportate per le fasi successive: la matrice oraria per la classificazione supervisionata, la matrice aggregata $396 \times 11$ (zona $\times$ mese) per il clustering e le serie temporali giornaliere continue per i modelli di forecasting econometrico.
+\end{enumerate}
+
+\paragraph{Nota metodologica:}
+Questa fase di ETL è fondamentale per trasformare un dataset grezzo e complesso in un formato \textit{immediatamente utilizzabile} per analisi visive, aggregazioni temporali e comparazioni geografiche, migliorando la robustezza e l'accuratezza dei modelli di Machine Learning e delle previsioni sulle serie temporali.
+
+\subsection{Codice ETL in Python}
+Di seguito viene riportato lo script Python (Codice~\ref{lst:etl}) implementato per automatizzare le operazioni di caricamento, selezione delle feature di interesse e imputazione dei valori mancanti:
+
+\begin{lstlisting}[language=Python, caption={Script Python di estrazione e preparazione del dataset ENTSO-E.}, label={lst:etl}]
+import os
+import pandas as pd
+import numpy as np
+
+FILE_PATH = "/Users/antonio/Desktop/Serie_Temporali/entsoe_data_2024_2025.csv"
+OUTPUT_DIR = "/Users/antonio/Desktop/Serie_Temporali/output"
+OUTPUT_PATH = f"{OUTPUT_DIR}/entsoe_data_processed.csv"
+columns_of_interest = [
+    "datetime",
+    "country",
+    "price",
+    "solar",
+    "wind_onshore",
+    "wind_offshore",
+    "hydro_total",
+    "fossil_gas",
+    "nuclear",
+    "fossil_hard_coal",
+    "fossil_brown_coal_lignite",
+    "biomass",
+    "waste",
+]
 
 
+def leggi_dataset(file_path=FILE_PATH):
+    """Carica il dataset CSV e restituisce i dati come DataFrame."""
+    dataset = pd.read_csv(file_path)
+    dataset["datetime"] = pd.to_datetime(dataset["datetime"], utc=True)
+    return dataset
 
 
+def seleziona_colonne(dataset):
+    """Mantiene nel DataFrame solo le colonne di interesse."""
+    colonne_da_eliminare = [
+        colonna for colonna in dataset.columns
+        if colonna not in columns_of_interest
+    ]
+    return dataset.drop(columns=colonne_da_eliminare)
 
+
+def sostituisci_valori_mancanti(dataset):
+    """Sostituisce tutti i valori mancanti con zero."""
+    return dataset.fillna(0)
+
+
+def salva_dataset(dataset, file_path=OUTPUT_PATH):
+    """Salva il dataset elaborato in formato CSV."""
+    output_dir = file_path.rsplit("/", 1)[0]
+    os.makedirs(output_dir, exist_ok=True)
+    dataset.to_csv(file_path, index=False)
+
+
+def stampa_info_dataset(dataset):
+    """Stampa le informazioni del DataFrame."""
+    dataset.info()
+    valori_nulli = dataset.isna().sum()
+    valori_nulli = valori_nulli[valori_nulli > 0]
+    print("\n =============================================================================\n")
+    print("\nValori nulli per colonna:")
+    print("\n =============================================================================\n")
+
+    print(valori_nulli.to_string())
+
+
+if __name__ == "__main__":
+    dati = leggi_dataset()
+    stampa_info_dataset(dati)
+    dati = seleziona_colonne(dati)
+    dati = sostituisci_valori_mancanti(dati)
+    salva_dataset(dati)
+    stampa_info_dataset(dati)
+\end{lstlisting}
