@@ -13,7 +13,7 @@ Di seguito viene riportato il Dizionario dei Dati (Tabella~\ref{tab:dizionario_d
 
 \renewcommand{\arraystretch}{1.2}
 \begin{xltabular}{\textwidth}{|l|X|}
-\caption{Elenco completo delle 25 variabili selezionate dal dataset ENTSO-E.} \label{tab:dizionario_dati} \\
+\caption{Dizionario delle variabili energetiche descritte nel dataset ENTSO-E.} \label{tab:dizionario_dati} \\
 \hline
 \rowcolor[gray]{0.9}
 \textbf{Nome Colonna} & \textbf{Descrizione} \\ \hline
@@ -69,15 +69,15 @@ In particolare, sono stati eseguiti i seguenti passaggi:
     Dal dataset originale sono state estratte solo le colonne necessarie per l'analisi, suddivise per categorie: identificativi temporali e geografici, quotazione di mercato del prezzo e singole fonti di produzione energetica primaria. Sono state rimosse 14 colonne aggregate ridondanti (aventi prefisso e suffisso \texttt{\_actual\_aggregated\_}) presenti unicamente per la Polonia e prive di dati per le restanti zone, migliorando la leggibilità e le performance di calcolo.
     
     \item \textit{Gestione dei vuoti strutturali e delle date}:\\
-    Nelle zone in cui una tecnologia non è fisicamente presente nell'infrastruttura energetica (ad esempio, il nucleare in Italia o l'eolico marino in Austria), i valori mancanti (\texttt{NaN}) sono stati convertiti a zero (\texttt{0.0}). Si è inoltre proceduto a convertire le date registrate in UTC (tipo : \texttt{timestamp}) nell'ora locale di ciascuna zona per preservare la corrispondenza fisica del ciclo solare.
+    Le fonti completamente prive di osservazioni in una zona sono rappresentate con zero. Le date sono conservate in UTC nel dataset elaborato; nel notebook, per i profili temporali, vengono convertite all'ora locale usando il fuso associato a ciascuna zona.
     \item \textit{Normalizzazione dei valori numerici e gestione dei prezzi mancanti}:\\
-    Il dataset presentava esattamente 22 valori di prezzo mancanti su oltre 301.000 righe, circoscritti a una singola ora per zona in concomitanza con la transizione dell'ora legale. Tali valori isolati sono stati imputati mediante interpolazione lineare locale. I prezzi estremi (compresi tra $-462{,}33$~\euro/MWh e $+1.896{,}00$~\euro/MWh) sono stati verificati e mantenuti in quanto rappresentano shock reali di mercato legati a congestioni o sovraproduzione da rinnovabili.
+    I 22 valori di prezzo mancanti nel dataset originale sono stati interpolati solo quando costituivano lacune brevi interne alla serie. La stessa regola, con un limite massimo di tre ore consecutive, è stata applicata ai buchi brevi delle fonti; i periodi più lunghi e i valori mancanti ai bordi sono stati mantenuti come mancanti.
     
     \item \textit{Verifica della qualità dei dati e filtraggio zonale}:\\
-    Il dataset è stato controllato per valori nulli e duplicati, confermando l'assenza di buchi temporali. A seguito della verifica, la zona irlandese (\texttt{IE\_SEM}) è stata esclusa dall'analisi a causa dell'eccessiva frammentarietà e incompletezza dei sensori di generazione (13.103 righe con estese lacune), garantendo un panel uniforme e bilanciato composto da 22 zone di mercato.
+    La zona irlandese (\texttt{IE\_SEM}) è stata esclusa per l'elevata frammentarietà delle serie di generazione. Per la Polonia, nel 2025 le colonne standard risultavano a zero mentre le serie erano disponibili nelle colonne \texttt{actual aggregated}; tali osservazioni sono state ricondotte alle rispettive fonti. Per la Svizzera, idroelettrico e nucleare passano bruscamente da valori positivi nel 2024 a zero in tutte le ore del 2025; poiché il dato non è plausibile come produzione effettiva, è stato marcato come mancante e non imputato.
     
     \item \textit{Preparazione per l'analisi di Machine Learning}:\\
-    Al termine del preprocessing, il dataset risultante è stato strutturato in tre viste analitiche esportate per le fasi successive: la matrice oraria per la classificazione supervisionata, la matrice aggregata $396 \times 11$ (zona $\times$ mese) per il clustering e le serie temporali giornaliere continue per i modelli di forecasting econometrico.
+    Al termine del preprocessing viene esportato un dataset orario con 22 zone di mercato e le 13 colonne selezionate. Le viste specifiche per classificazione, clustering e forecasting saranno costruite nelle rispettive fasi di analisi.
 \end{enumerate}
 
 \paragraph{Nota metodologica:}
@@ -114,6 +114,8 @@ columns_of_interest = [
 def leggi_dataset(file_path=FILE_PATH):
     """Carica il dataset CSV e restituisce i dati come DataFrame."""
     dataset = pd.read_csv(file_path)
+    # Conserva l'anno locale originale per riconoscere i periodi di discontinuità.
+    dataset["anno_locale"] = dataset["datetime"].str[:4].astype(int)
     dataset["datetime"] = pd.to_datetime(dataset["datetime"], utc=True)
     return dataset
 
@@ -128,8 +130,52 @@ def seleziona_colonne(dataset):
 
 
 def sostituisci_valori_mancanti(dataset):
-    """Sostituisce tutti i valori mancanti con zero."""
-    return dataset.fillna(0)
+    dataset = dataset[dataset["country"] != "IE_SEM"].copy()
+    fonti = [
+        c for c in columns_of_interest
+        if c not in ("datetime", "country", "price") and c in dataset.columns
+    ]
+
+    # Nel 2025 i dati polacchi sono pubblicati nelle colonne *_actual_aggregated_,
+    # mentre le colonne standard risultano a zero. Ricostruisce le fonti selezionate.
+    colonne_polonia = {
+        "solar": "_solar_actual_aggregated_",
+        "wind_onshore": "_wind_onshore_actual_aggregated_",
+        "fossil_gas": "_fossil_gas_actual_aggregated_",
+        "fossil_hard_coal": "_fossil_hard_coal_actual_aggregated_",
+        "fossil_brown_coal_lignite": "_fossil_brown_coal_lignite_actual_aggregated_",
+        "biomass": "_biomass_actual_aggregated_",
+    }
+    polonia_2025 = dataset["country"].eq("PL") & dataset["anno_locale"].ge(2025)
+    for colonna, sorgente in colonne_polonia.items():
+        dataset.loc[polonia_2025, colonna] = dataset.loc[polonia_2025, sorgente]
+
+    componenti_idro_polonia = [
+        "_hydro_pumped_storage_actual_aggregated_",
+        "_hydro_run_of_river_and_poundage_actual_aggregated_",
+        "_hydro_water_reservoir_actual_aggregated_",
+    ]
+    dataset.loc[polonia_2025, "hydro_total"] = dataset.loc[
+        polonia_2025, componenti_idro_polonia
+    ].sum(axis=1, min_count=1)
+
+    # In Svizzera idroelettrico e nucleare passano da valori positivi nel 2024
+    # a zero per tutte le ore del periodo 2025: sono dati di generazione mancanti,
+    # non produzione nulla. Li preserviamo come NaN invece di inventare zeri.
+    svizzera_2025 = dataset["country"].eq("CH") & dataset["anno_locale"].ge(2025)
+    dataset.loc[svizzera_2025, ["hydro_total", "nuclear"]] = np.nan
+
+    # fonte mai prodotta in una zona -> 0
+    for c in fonti:
+        mai = dataset.groupby("country")[c].transform(lambda s: s.notna().sum() == 0)
+        dataset.loc[mai, c] = 0
+    dataset = dataset.sort_values(["country", "datetime"])
+    # Interpola solo lacune brevi interne; lascia mancanti i periodi lunghi o ai bordi.
+    cols = fonti + ["price"]
+    dataset[cols] = dataset.groupby("country")[cols].transform(
+        lambda s: s.interpolate(method="linear", limit=3, limit_area="inside")
+    )
+    return dataset.drop(columns="anno_locale")
 
 
 def salva_dataset(dataset, file_path=OUTPUT_PATH):
@@ -154,8 +200,9 @@ def stampa_info_dataset(dataset):
 if __name__ == "__main__":
     dati = leggi_dataset()
     stampa_info_dataset(dati)
-    dati = seleziona_colonne(dati)
     dati = sostituisci_valori_mancanti(dati)
+    dati = seleziona_colonne(dati)
     salva_dataset(dati)
     stampa_info_dataset(dati)
+
 \end{lstlisting}
