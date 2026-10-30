@@ -113,6 +113,31 @@ Il profilo locale evidenzia quindi fonti con andamenti stagionali diversi: il so
     \label{fig:stagionalita_mensile_it_nord}
 \end{center}
 
+\section{Distribuzione dei prezzi e ore a prezzo negativo}
+
+La Dashboard di analisi della distribuzione dei prezzi, mostrata in Figura~\ref{fig:distribuzione_prezzi}, esamina la frequenza con cui il prezzo \textit{day-ahead} assume valori nulli o negativi, evidenziandone la distribuzione tra le zone di mercato e nel tempo. Si tratta di un fenomeno tipico dei sistemi con elevata presenza di fonti rinnovabili non programmabili, che nelle ore di sovrapproduzione possono spingere il prezzo di equilibrio a zero o al di sotto di zero.
+
+La visualizzazione è articolata in due pannelli complementari. Per garantire una lettura coerente dei risultati, sono state adottate le seguenti scelte metodologiche e visive:
+\begin{itemize}
+    \item \textbf{Soglia di prezzo nullo o negativo:} è considerata \textit{ora a prezzo nullo o negativo} ogni ora in cui il prezzo \textit{day-ahead} risulta $\leq 0$ €/MWh;
+    \item \textbf{Frequenza per zona di mercato:} il pannello superiore riporta, in ordine decrescente, la percentuale di ore a prezzo $\leq 0$ sul totale delle ore osservate in ciascuna zona, permettendo il confronto diretto tra mercati;
+    \item \textbf{Distribuzione temporale:} il pannello inferiore è una \textit{heatmap} ora del giorno $\times$ mese, calcolata in ora locale dell'Europa centrale (CET/CEST) sui 18 mesi consecutivi del dataset, in cui ciascuna cella riporta la percentuale media di ore a prezzo $\leq 0$ calcolata sull'insieme delle 22 zone;
+    \item \textbf{Scala cromatica sequenziale:} utilizzo di una palette dal giallo al rosso scuro, in cui l'intensità del colore cresce con la frequenza del fenomeno.
+\end{itemize}
+
+A livello di singola zona, la frequenza più elevata si osserva in Spagna (10,6\%), seguita da Francia (7,9\%), Svezia SE4 (7,6\%), Paesi Bassi (7,5\%), Portogallo (7,4\%) e Germania/Lussemburgo (7,2\%). All'estremo opposto si collocano la Norvegia NO3 (2,0\%) e, in particolare, l'Italia Nord (0,1\%), dove il prezzo minimo osservato è pari a 0 €/MWh e non si registrano prezzi negativi.
+
+La heatmap evidenzia una marcata concentrazione del fenomeno nelle ore centrali della giornata e nei mesi primaverili ed estivi. Considerando l'intero periodo, alle 13:00 circa il 17\% delle ore è a prezzo nullo o negativo, contro lo 0,3\% delle 21:00. Il picco si osserva da aprile a giugno, con valori fino al 34\% nel 2024 (maggio, ore 14) e al 47\% nel 2025 (aprile, ore 13), mentre da novembre a febbraio il fenomeno resta molto contenuto (non oltre il 4\%). Questo andamento è coerente con la sovrapproduzione fotovoltaica nelle ore di massima insolazione. Tra settembre e novembre si osservano inoltre valori non trascurabili anche nelle ore notturne (fino all'8\% a ottobre 2024), il che suggerisce il contributo di altre fonti non programmabili, come l'eolico.
+
+Il confronto tra gli stessi mesi dei due anni mostra una frequenza più elevata nel 2025. L'evidenza è tuttavia limitata ai soli mesi da aprile a giugno, gli unici disponibili per il 2025, e il dataset non consente di distinguere l'effetto di una maggiore capacità installata da quello delle condizioni meteorologiche o della domanda.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/analisi/distribuzione_prezzo_ore_negative.png}
+    \caption{Frequenza delle ore a prezzo nullo o negativo per zona di mercato (in alto) e distribuzione per ora del giorno e mese (in basso).}
+    \label{fig:distribuzione_prezzi}
+\end{figure}
+
 \section{Matrice di correlazione di Pearson}
 
 La matrice di Pearson misura la direzione e l'intensità dell'associazione lineare tra il prezzo dell'energia e la produzione delle diverse fonti, calcolandola separatamente per ciascun paese. I coefficienti variano tra $-1$ e $+1$:
@@ -149,3 +174,5 @@ La Figura~\ref{fig:matrice_spearman_prezzo} mostra che i pattern generali sono i
     \captionof{figure}{Matrice di correlazione di Spearman tra prezzo e produzione per paese.}
     \label{fig:matrice_spearman_prezzo}
 \end{center}
+
+

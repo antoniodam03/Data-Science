@@ -161,7 +161,7 @@ def sostituisci_valori_mancanti(dataset):
 
     # In Svizzera idroelettrico e nucleare passano da valori positivi nel 2024
     # a zero per tutte le ore del periodo 2025: sono dati di generazione mancanti,
-    # non produzione nulla. Li preserviamo come NaN invece di inventare zeri.
+    # non produzione nulla. Li preserviamo come NaN.
     svizzera_2025 = dataset["country"].eq("CH") & dataset["anno_locale"].ge(2025)
     dataset.loc[svizzera_2025, ["hydro_total", "nuclear"]] = np.nan
 
