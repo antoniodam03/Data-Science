@@ -26,12 +26,12 @@ La Dashboard di analisi del mix energetico, mostrata in Figura~\ref{fig:mix_prod
 
 Il sistema di visualizzazione è articolato in una matrice di sotto-grafici a barre (subplot) che scompone la produzione totale in dieci fonti energetiche fondamentali: Solare, Eolico Onshore, Eolico Offshore, Idroelettrico, Nucleare, Gas Fossile, Carbone, Lignite, Biomasse e Rifiuti. Per garantire una resa visiva immediata e una rigorosa coerenza interpretativa, sono state applicate specifiche regole di visualizzazione e formattazione:
 \begin{itemize}
-    \item \textbf{Codifica cromatica standardizzata:} a ciascuna delle dieci fonti energetiche è associato un colore univoco e distintivo, mantenuto inalterato in tutte le componenti della dashboard per favorire il tracciamento visivo;
+    \item \textbf{Codifica cromatica:} a ciascuna delle dieci fonti energetiche è assegnato un colore specifico, utilizzato in modo coerente in tutte le sezioni della dashboard per facilitarne il riconoscimento e il confronto visivo.
     \item \textbf{Normalizzazione delle quote (\%):} per ogni paese, la quota di ciascuna fonte è calcolata rispetto alla somma delle dieci fonti selezionate. Le percentuali descrivono quindi la composizione relativa a queste fonti e non la quota sul totale di tutte le tecnologie di generazione;
-    \item \textbf{Ordinamento decrescente strutturato:} all'interno di ciascun pannello, i paesi sono disposti in ordine decrescente in base al peso della specifica fonte, mettendo istantaneamente in risalto i mercati leader.
+    \item \textbf{Ordinamento decrescente:} all'interno di ciascun pannello, i paesi sono disposti in ordine decrescente in base al peso della specifica fonte, mettendo istantaneamente in risalto i mercati leader.
 \end{itemize}
 
-Accanto alla visione d'insieme, la dashboard permette di profilare l'impronta tecnologica dei singoli stati e di identificare le gerarchie di generazione. Questo approccio consente di distinguere nettamente le economie ancorate a un carico di base (\textit{baseload}) decarbonizzato o programmabile (come la prevalenza del nucleare in Francia o dell'idroelettrico nei paesi nordici) dai contesti caratterizzati da un'elevata penetrazione di fonti rinnovabili non programmabili o da una forte dipendenza dal gas di bilanciamento.
+Accanto alla visione d'insieme, la dashboard permette di profilare l'impronta tecnologica dei singoli stati e di identificare come essi stessi producono energia. Questo approccio permette di distinguere i Paesi in cui la produzione di energia si basa principalmente su fonti costanti e programmabili, come il nucleare in Francia e l'idroelettrico nei Paesi nordici, da quelli caratterizzati da una maggiore presenza di fonti rinnovabili non programmabili o da un maggiore ricorso al gas naturale per compensare le variazioni della produzione energetica.
 
 \begin{figure}[ht!]
     \centering
@@ -46,11 +46,10 @@ Accanto alla visione d'insieme, la dashboard permette di profilare l'impronta te
 
 La Dashboard geografica dei prezzi medi, mostrata in Figura~\ref{fig:mappa_prezzi}, analizza lo scenario spaziale del mercato elettrico europeo, focalizzandosi sull'identificazione dei divari regionali, dei cluster di prezzo e della relazione tra posizione geografica e costo finale dell'energia.
 
-La visualizzazione principale è costituita da una mappa a scala di colore ad alta risoluzione del continente europeo, costruita per mappare visivamente il prezzo medio spot (€/MWh) di ciascuna zona di mercato. Per garantire un'immediata comprensione delle dinamiche geografiche, il sistema adotta le seguenti specifiche metodologiche e visive:
+La visualizzazione principale è costituita da una mappa a scala di colore ad alta risoluzione del continente europeo, costruita per mappare visivamente il prezzo medio (€/MWh) di ciascuna zona di mercato. Per garantire un'immediata comprensione delle dinamiche geografiche, il sistema adotta le seguenti specifiche metodologiche e visive:
 \begin{itemize}
     \item \textbf{Proiezione cartografica europea:} utilizzo della proiezione su una cartina Europea, che preserva le proporzioni reali e le forme delle nazioni;
-    \item \textbf{Scala cromatica continua a semaforo:} applicazione di una palette divergente invertita in cui il \textbf{Rosso} identifica gli \textit{hotspot} ad alto costo, il \textbf{Giallo} segnala i prezzi di fascia media e il \textbf{Verde} evidenzia le zone di mercato a basso costo;
-    \item \textbf{Campitura dei dati mancanti:} utilizzo di una tonalità grigio chiaro neutra per identificare i territori extra-perimetro o non monitorati dal sistema ENTSO-E, evitando ambiguità interpretative.
+    \item \textbf{Scala cromatica continua a semaforo:} applicazione di una palette divergente invertita in cui il \textbf{Rosso} identifica gli \textit{hotspot} ad alto costo, il \textbf{Giallo} segnala i prezzi di fascia media e il \textbf{Verde} evidenzia le zone di mercato a basso costo.
 \end{itemize}
 
 Accanto alla rappresentazione estetica, la dashboard consente di evidenziare chiaramente i gradienti di prezzo tra i diversi contesti europei. L'analisi spaziale mette in luce una marcata spaccatura tra i mercati del Nord Europa (caratterizzati da prezzi medi contenuti grazie all'abbondanza di risorsa idroelettrica ed eolica) e le regioni del Centro-Sud Europa, dove la marginalità del gas fossile e i vincoli di interconnessione transfrontaliera mantengono il costo medio dell'elettricità su livelli strutturalmente più elevati.
