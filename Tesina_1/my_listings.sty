@@ -1,0 +1,53 @@
+  \usepackage{colortbl}
+  \usepackage{listings}
+
+
+%-- Sfondo dei listati:
+  %\definecolor{colore_sfondo}{gray}{1.00}
+  \definecolor{colore_sfondo}{rgb}{0.50,0.50,0.50}
+
+%-- nome nella caption nella toc
+\renewcommand{\lstlistingname}{Listato}
+
+%-- comandi comuni a tutti i listati
+\lstset{
+  basicstyle=\tiny\tt,
+  stringstyle=\tiny\tt,
+  keywordstyle=\tiny\tt,
+  showstringspaces=false,
+  captionpos=b,
+  columns=flexible,
+  aboveskip=10pt,
+  %backgroundcolor=\color{colore_sfondo},
+  frameround=fttt,
+  %frame=trBL,
+  framerule=0pt,
+  xleftmargin=11.5mm,
+  xrightmargin=8.5mm,
+  breaklines=true,
+  language=Java,
+  extendedchars=true,
+  %numbers=left,
+  %numberstyle=\tiny
+  %tabsize=3,
+  framexleftmargin=5mm,
+  frame=shadowbox,
+  rulesepcolor=\color{colore_sfondo},
+  literate=
+  {à}{{\ttfamily\`a}}1
+  {è}{{\ttfamily\`e}}1
+  {ì}{{\ttfamily\`i}}1
+  {ò}{{\ttfamily\`o}}1
+  {ù}{{\ttfamily\`u}}1
+}
+
+
+%-- Esempio di utilizzo del pacchetto
+%
+%\begin{lstlisting}[float=t, caption=Titolo del listato, label=lst:etichetta]
+%for (int i; i < 10; i++)
+%{
+%    cout << "Ciao mondo";
+%    cout << endl;
+%}
+%\end{lstlisting}
