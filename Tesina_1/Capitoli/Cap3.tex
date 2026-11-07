@@ -9,14 +9,16 @@ La classificazione è una tecnica di apprendimento supervisionato che consente d
 \begin{itemize}
     \item \textbf{T1 -- Classificare le ore a prezzo nullo o negativo}\\
     Stabilire se il prezzo orario di una zona di mercato è minore o uguale a zero, a partire dalla produzione per fonte, dall'ora del giorno, dal giorno della settimana e dalla zona.
-    \item \textbf{T2 -- Classificare l'ora rispetto al prezzo medio giornaliero}\\
-    Determinare se il prezzo di una determinata ora è superiore o inferiore al prezzo medio della stessa zona nello stesso giorno.
-    \item \textbf{T3 -- Classificare il prezzo in base alla fascia di prezzo della zona}\\
-    Assegnare ciascuna ora a una delle quattro fasce di prezzo (bassa, medio-bassa, medio-alta, alta), definite dai quartili del prezzo di ogni zona nell'anno 2024.
-    \item \textbf{T4 -- Classificare la fascia oraria della giornata}\\
-    Identificare la fascia del giorno (notte, mattina, pomeriggio, sera) a partire dal mix di produzione, senza utilizzare l'ora tra le variabili di input.
 \end{itemize}
 Questo capitolo descrive in dettaglio i passi intrapresi, partendo dalla preparazione dei dati e dalla validazione temporale (addestramento sul 2024 e test da gennaio a giugno 2025) fino all'analisi comparativa dei modelli, evidenziando le principali sfide affrontate, tra cui lo sbilanciamento delle classi e lo spostamento di distribuzione dei prezzi tra i due periodi, e i risultati ottenuti.
+
+\begin{center}
+\colorbox{gray!15}{%
+  \parbox{\dimexpr\linewidth-2\fboxsep}{%
+    \textit{Si è deciso un solo task di classificazione, poichè il dataset in esame si presta meglio al problema della regressione.}
+  }%
+}
+\end{center}
 
 \section{Task 1: Classificazione dei Prezzi Nulli o Negativi}
 \label{sec:task1_descrizione}

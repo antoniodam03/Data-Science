@@ -1,6 +1,81 @@
 \chapter{Regressione} %\label{4cap:clustering}
 
 \begin{preamble}
-{\em Preambolo}
+{\em In questo capitolo viene affontato il problema della regressione poiché il dataset in esame si presta naturalmente a questo tipo di
+formulazione problema,}
 \end{preamble}
+
+La regressione è una tecnica di apprendimento supervisionato che consente
+di modellare la relazione tra una variabile obiettivo continua e un
+insieme di variabili input, con l'obiettivo di stimare il valore atteso
+della prima condizionato ai valori assunti dalle seconde.
+
+I task che si vogliono affrontare in questo capitolo sono i seguenti:
+
+\begin{itemize}
+    \item \textbf{T1 -- Prevedere il prezzo orario a partire dal mix di generazione}\\
+    stabilire il prezzo all'ora $t$
+    dalle fonti di generazione della stessa ora e dal contesto temporale.
+\end{itemize}
+
+\section{Metriche di Valutazione Scelte}
+\label{sec:t1_regressione_metriche}
+Per valutare i modelli sul test set (2025), sono state impiegate cinque metriche:
+
+\begin{itemize}
+    \item \textbf{Mean Absolute Error (MAE)}:
+    \begin{equation}
+    \text{MAE} = \frac{1}{N} \sum_{i=1}^{N} |y_i - \hat{y}_i|
+    \end{equation}
+    Calcolato con \texttt{mean\_absolute\_error}, esprime l'errore medio in \euro/MWh ed è robusto agli outlier.
+
+    \item \textbf{Root Mean Squared Error (RMSE)}:
+    \begin{equation}
+    \text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2}
+    \end{equation}
+    Calcolato con \texttt{np.sqrt(mean\_squared\_error)}, penalizza maggiormente gli scostamenti ampi e i picchi estremi.
+
+    \item \textbf{Coefficiente di Determinazione ($R^2$)}:
+    \begin{equation}
+    R^2 = 1 - \frac{\sum_{i=1}^N (y_i - \hat{y}_i)^2}{\sum_{i=1}^N (y_i - \bar{y})^2}
+    \end{equation}
+    Calcolato con \texttt{r2\_score}, indica la quota di varianza spiegata rispetto alla media ($1$ perfetto, $\leq 0$ non informativo).
+
+    \item \textbf{Mean Bias Error (Bias)}:
+    \begin{equation}
+    \text{Bias} = \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)
+    \end{equation}
+    Calcolato con \texttt{np.mean(y\_pred - y\_test)}, quantifica la tendenza sistematica a sottostimare ($<0$) o sovrastimare ($>0$).
+
+    \item \textbf{Correlazione di Spearman ($\rho$)}:
+    \begin{equation}
+    \rho = 1 - \frac{6 \sum_{i=1}^{N} d_i^2}{N(N^2 - 1)}
+    \end{equation}
+    Calcolato con \texttt{spearmanr}, misura la capacità del modello di ordinare correttamente le ore dalle più economiche alle più costose.
+\end{itemize}
+
+\section{Task 1: Previsione del prezzo orario a partire dal mix di generazione}
+\label{sec:t1_regressione_obiettivo}
+
+\subsection{Definizione dell'Obiettivo}
+Il task predittivo \textbf{Task 1 (T1)} consiste nella stima puntuale continua del prezzo dell'energia elettrica all'ingrosso sul mercato \textit{day-ahead} per ciascuna zona di mercato $z$ all'ora $t$, basandosi unicamente sul mix di produzione elettrica per fonte e sul contesto temporale della stessa ora.
+
+L'obiettivo di questo task è verificare se e con quale accuratezza sia possibile apprendere la funzione di costo marginale del sistema elettrico europeo in modo puramente statico (ossia senza informazioni autoregressive o lag di prezzo passati), stimando direttamente il prezzo a partire dalla composizione istantanea dell'offerta e dal ciclo di consumo intra-giornaliero e settimanale. Tale formulazione è di fondamentale rilevanza per la simulazione di scenari energetici futuri.
+
+Matematicamente, il problema è formalizzato come una regressione supervisionata in cui la variabile target continua è:
+\begin{equation}
+y = P_{z,t} \in \mathbb{R} \quad [\text{\euro / MWh}]
+\end{equation}
+a partire da un vettore di feature $\mathbf{x} \in \mathbb{R}^{D}$ composto da:
+\begin{itemize}
+    \item \textbf{Mix di generazione} $\mathbf{g}_t \in \mathbb{R}^{10}$: quote orarie di produzione in MW suddivise per tecnologia (fotovoltaico, eolico onshore/offshore, nucleare, gas fossile, carbone, lignite, idroelettrico totale, biomassa e rifiuti);
+    \item \textbf{Contesto temporale} $\mathbf{t}_t \in \mathbb{R}^{5}$: ora locale del giorno $h \in [0, 23]$, trasformazione ciclica $[\sin(2\pi h / 24), \cos(2\pi h / 24)]$, giorno della settimana e variabile binaria di weekend;
+    \item \textbf{Localizzazione geografica} $\mathbf{z} \in \{0, 1\}^{K-1}$: codifica one-hot delle $K=22$ zone di mercato europee considerate.
+\end{itemize}
+
+L'algoritmo di regressione mira quindi ad apprendere un'ipotesi predittiva $\hat{f}: \mathcal{X} \to \mathbb{R}$ che minimizzi l'errore atteso di predizione:
+\begin{equation}
+\hat{y} = \hat{f}(\mathbf{x}) \approx y
+\end{equation}
+consentendo di quantificare la quota di varianza del prezzo spiegabile unicamente dalle caratteristiche di generazione e dal ciclo orario della domanda.
 
