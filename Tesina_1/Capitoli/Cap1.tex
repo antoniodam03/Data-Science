@@ -130,7 +130,7 @@ def seleziona_colonne(dataset):
 
 
 def sostituisci_valori_mancanti(dataset):
-    dataset = dataset[dataset["country"] != "IE_SEM"].copy()
+   dataset = dataset[dataset["country"] != "IE_SEM"].copy()
     fonti = [
         c for c in columns_of_interest
         if c not in ("datetime", "country", "price") and c in dataset.columns

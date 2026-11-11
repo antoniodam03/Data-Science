@@ -5,7 +5,7 @@
 \end{preamble}
 
 
-La classificazione è una tecnica di apprendimento supervisionato che consente di assegnare i dati a categorie predefinite. Nel seguente studio sono stati condotti quattro diversi task, tutti basati sul prezzo orario \textit{day-ahead} (\texttt{price}, in €/MWh) e sul mix di produzione delle zone di mercato, di seguito elencati:
+La classificazione è una tecnica di apprendimento supervisionato che consente di assegnare i dati a categorie predefinite. Nel seguente studio è stato condotto un solo task basato sul prezzo orario \textit{day-ahead} (\texttt{price}, in \euro/MWh) e sul mix di produzione delle zone di mercato, di seguito elencato: 
 \begin{itemize}
     \item \textbf{T1 -- Classificare le ore a prezzo nullo o negativo}\\
     Stabilire se il prezzo orario di una zona di mercato è minore o uguale a zero, a partire dalla produzione per fonte, dall'ora del giorno, dal giorno della settimana e dalla zona.
@@ -15,7 +15,7 @@ Questo capitolo descrive in dettaglio i passi intrapresi, partendo dalla prepara
 \begin{center}
 \colorbox{gray!15}{%
   \parbox{\dimexpr\linewidth-2\fboxsep}{%
-    \textit{Si è deciso un solo task di classificazione, poichè il dataset in esame si presta meglio al problema della regressione.}
+    \textit{Si è deciso un solo task di classificazione, poiché il dataset in esame si presta meglio al problema della regressione.}
   }%
 }
 \end{center}
@@ -69,7 +69,7 @@ Prima di procedere all'addestramento dei modelli di \textit{Machine Learning}, �
 Per l'addestramento dei classificatori è stata definita una matrice di input basata sulle seguenti feature:
 \begin{itemize}
     \item \textbf{Produzione energetica (MW):} \texttt{solar}, \texttt{wind\_onshore}, \texttt{wind\_offshore}, \texttt{nuclear}, \texttt{fossil\_gas}, \texttt{fossil\_hard\_coal}, \texttt{fossil\_brown\_coal\_lignite}, \texttt{hydro\_total}, \texttt{biomass}, \texttt{waste}.
-    \item \textbf{Variabili temporali:} \texttt{ora} (0–23) e \texttt{giorno\_settimana} (0–6).
+    \item \textbf{Variabili temporali:} \texttt{ora} (0--23) e \texttt{giorno\_settimana} (0--6).
     \item \textbf{Variabile spaziale:} \texttt{country} (codificata tramite One-Hot Encoding con \textit{drop\_first}).
 \end{itemize}
 
@@ -81,7 +81,7 @@ Al fine di garantire una valutazione rigorosa e prevenire il fenomeno del \texti
 
 \section{T1: Random Forest}
 
-Utilizzando l'algoritmo di ML \textit{Random Forest} si hanno i seguenti Risultati:
+Utilizzando l'algoritmo di ML \textit{Random Forest} si hanno i seguenti risultati:
 
 \begin{table}[htbp]
     \centering
@@ -101,7 +101,7 @@ Utilizzando l'algoritmo di ML \textit{Random Forest} si hanno i seguenti Risulta
 \begin{center}
     \includegraphics[width=0.5\textwidth]{images/analisi/output/random_forest/matrice_confusione_t1.png}
     \captionof{figure}{Matrice di confusione prodotta dal modello Random Forest}
-    \label{fig:Matrice di Confusione}
+    \label{fig:matrice_confusione_rf}
 \end{center}
 
 \begin{figure}[ht!]
@@ -123,7 +123,7 @@ Al fine di incrementare l'affidabilità predittiva e ridurre i falsi allarmi sen
     \item \textbf{\texttt{class\_weight = "balanced\_subsample"}:} ricalcolo dinamico dei pesi di penalizzazione dell'errore per ciascun sottoinsieme di campionamento dei singoli alberi.
 \end{itemize}
 
-I risultati ottenuti sul Test Set (dati 2025) con il modello ottimizzato riflettono le dinamiche del partizionamento temporale applicato. Sulla classe minoritaria (Prezzo $\leq$ 0 \euro / MWh) si evidenzia il seguente bilanciamento:
+I risultati ottenuti sul Test Set (dati 2025) con il modello ottimizzato riflettono le dinamiche del partizionamento temporale applicato. Sulla classe minoritaria (Prezzo $\leq$ 0 \euro/MWh) si evidenzia il seguente bilanciamento:
 \begin{itemize}
     \item \textbf{Precision:} $69\%$ (il modello risulta altamente affidabile quando genera un allarme, contenendo i falsi positivi a sole 976 istanze su oltre 90.000 osservazioni totali).
     \item \textbf{Recall:} $39\%$ (la capacità di intercettare i crolli reali nel nuovo orizzonte temporale inedito si riduce: il modello sacrifica parte della sensibilità per garantire l'affidabilità delle previsioni effettuate).
@@ -133,7 +133,7 @@ I risultati ottenuti sul Test Set (dati 2025) con il modello ottimizzato riflett
 
 \section{T1: K-Nearest Neighbors (KNN)}
 
-Utilizzando l'algortimo di ML \textit{K-Nearest Neighbors (KNN)} si hanno i seguenti risultati:
+Utilizzando l'algoritmo di ML \textit{K-Nearest Neighbors (KNN)} si hanno i seguenti risultati:
 
 \begin{table}[htbp]
     \centering
@@ -171,7 +171,7 @@ Riepilogo delle metriche aggiunte:
 \begin{center}
     \includegraphics[width=0.8\textwidth]{images/analisi/output/knn/matrice_confusione_knn_t1.png}
     \captionof{figure}{Matrice di confusione prodotta dal modello KNN}
-    \label{fig:Matrice di Confusione}
+    \label{fig:matrice_confusione_knn}
 \end{center}
 
 Come secondo algoritmo di riferimento per il Task 1 è stato valutato il classificatore \textbf{K-Nearest Neighbors (KNN)}. A differenza degli alberi di decisione, il KNN è un modello basato sulle istanze e sulle distanze geometriche nello spazio multidimensionale delle feature, risultando particolarmente sensibile alla scala dei dati.
@@ -202,7 +202,7 @@ Utilizzando l'algoritmo \textit{Decision Tree} si hanno i seguenti risultati:
     \centering
     \includegraphics[width=0.8\textwidth]{images/analisi/output/decision_tree/matrice_confusione_dt_t1.png}
     \caption{Matrice di confusione Decision Tree}
-    \label{fig:Decision Tree}
+    \label{fig:matrice_confusione_dt}
 \end{figure}
 
 Come terzo modello analizzato per il Task 1 è stato valutato l'algoritmo del \textbf{Decision Tree (Albero di Decisione)}. A differenza del \textit{Random Forest}, che si basa su una foresta di alberi decorrelati, il Decision Tree costruisce un'unica struttura gerarchica di regole di decisione basate sulla suddivisione ricorsiva dello spazio delle feature (\textit{recursive splitting}).
@@ -244,7 +244,7 @@ Weighted avg & 0.92 & 0.92 & 0.92 & 90027 \\
     \centering
     \includegraphics[width=0.8\textwidth]{images/analisi/output/naive_bayes/matrice_confusione_nb_t1.png}
     \caption{Matrice di confusione Naive Bayes}
-    \label{fig:Naive Bayes}
+    \label{fig:matrice_confusione_nb}
 \end{figure}
 
 Il principale vantaggio del Naive Bayes risiede nella sua estrema efficienza computazionale e nella rapidità di addestramento. Tuttavia, nel contesto specifico della previsione dei prezzi dell'energia elettrica basata su volumi di generazione e variabili temporali, il modello mostra limiti strutturali evidenti:
@@ -327,19 +327,19 @@ L'applicazione della soglia di 0.82 sul Test Set del 2025 ha prodotto un netto m
 
 \subsection{Conclusione e Tabella Comparativa del Task 1}
 
-L'analisi condotta sui classificatori per il Task 1 evidenzia i seguenti risultati riassunti nella tabella~\ref{tab:comparativa_task1}, riassumendo le prestazioni dei modelli valutati per il Task 1, ordinati dal migliore al peggiore in base all'efficacia complessiva sulla classe critica dei prezzi nulli o negativi:
+L'analisi condotta sui classificatori per il Task 1 evidenzia i risultati riassunti nella tabella~\ref{tab:comparativa_task1}. I modelli sono ordinati in base all'F1-Score decrescente, indicatore che meglio sintetizza l'equilibrio complessivo sulla classe critica dei prezzi nulli o negativi. A parità di F1-Score, è stata privilegiata la Precision, per ridurre i falsi allarmi.
 
 \begin{table}[htbp]
     \centering
-    \caption{Tabella comparativa dei modelli per il Task 1 (dal migliore al peggiore).}
+    \caption{Tabella comparativa dei modelli per il Task 1 (dal migliore al peggiore per F1-Score).}
     \label{tab:comparativa_task1}
     \begin{tabular}{|l|c|c|c|}
         \hline
         \textbf{Modello} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\ \hline
-        1. Random Forest Ottimizzato & 69\% & 39\% & 50\% \\ \hline
-        2. Gradient Boosting (Soglia Ott.) & 58\% & 51\% & 54\% \\ \hline
-        3. K-Nearest Neighbors (KNN) & 65\% & 39\% & 49\% \\ \hline
-        4. Decision Tree (Singolo) & 42\% & 62\% & 50\% \\ \hline
+        1. Gradient Boosting (Soglia Ott.) & 58\% & 51\% & 54\% \\ \hline
+        2. Random Forest Ottimizzato & 69\% & 39\% & 50\% \\ \hline
+        3. Decision Tree (Singolo) & 42\% & 62\% & 50\% \\ \hline
+        4. K-Nearest Neighbors (KNN) & 65\% & 39\% & 49\% \\ \hline
         5. Naive Bayes & 37\% & 36\% & 36\% \\ \hline
     \end{tabular}
 \end{table}
